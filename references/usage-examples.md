@@ -13,7 +13,7 @@
 **② 创建飞书待办**：
 
 ```bash
-lark-cli task +create --summary "交项目周报给客户" --assignee "ou_2b934d4428a22adfc9e45ccd21e4c15c" --due "2026-10-20T18:00:00+08:00" --description "级别：重要"
+lark-cli task +create --summary "交项目周报给客户" --assignee "ou_<你的OpenID>" --due "2026-10-20T18:00:00+08:00" --description "级别：重要"
 ```
 
 假设返回 `guid=xxx`、`url=yyy`。
@@ -35,7 +35,7 @@ lark-cli task +create --summary "交项目周报给客户" --assignee "ou_2b934d
 本次请求是由「交周报-重要-提前1小时」定时任务到时触发的。请执行以下动作：
 1. 用 lark-cli 查询飞书任务 xxx（url yyy）的当前状态；若任务已完成/已结束，本次不发送任何消息，直接结束。
 2. 若当前时间处于 23:00–07:00 且该任务级别非「重要」，跳过本次发送，在回复中说明"深夜静默已跳过"，直接结束。
-3. 读取文件 /Users/mima1234/DoubaoWork/feishu-reminder-webhook.txt 中的飞书自定义机器人 Webhook 地址（去除首尾空白）。
+3. 读取文件 ./feishu-reminder-webhook.txt 中的飞书自定义机器人 Webhook 地址（去除首尾空白）。
 4. 用 curl 以 POST JSON 方式向该地址发送提醒消息，内容如下：
 {"msg_type":"text","content":{"text":"📌 待办提醒：交项目周报给客户\n🔥 级别：重要\n⏰ 截止时间：2026-10-20 18:00（还剩1小时）\n🔗 任务链接：yyy"}}
 5. 若发送失败（HTTP 失败或响应 code 不为 0），等待约 10 秒后重试一次；仍失败则在回复中明确说明失败原因，不要静默跳过。
@@ -47,7 +47,7 @@ lark-cli task +create --summary "交项目周报给客户" --assignee "ou_2b934d
 本次请求是由「交周报-重要-最终检查」定时任务到时触发的。请执行以下动作：
 1. 用 lark-cli 查询飞书任务 xxx（任务链接 yyy）的当前状态。
 2. 若该任务已完成/已结束，本次不发送任何消息，直接结束。
-3. 若任务仍未完成，读取文件 /Users/mima1234/DoubaoWork/feishu-reminder-webhook.txt 中的飞书自定义机器人 Webhook 地址（去除首尾空白），用 curl POST 推送最终提醒：
+3. 若任务仍未完成，读取文件 ./feishu-reminder-webhook.txt 中的飞书自定义机器人 Webhook 地址（去除首尾空白），用 curl POST 推送最终提醒：
 {"msg_type":"text","content":{"text":"⏰ 最终提醒：交项目周报给客户 将在 1 分钟内到期，若还未完成请抓紧处理\n🔗 任务链接：yyy"}}
 4. 若发送失败（HTTP 失败或响应 code 不为 0），等待约 10 秒后重试一次；仍失败则在回复中明确说明失败原因，不要静默跳过。
 ```
@@ -112,7 +112,7 @@ lark-cli task +create --summary "交项目周报给客户" --assignee "ou_2b934d
 ```text
 本次请求是由「每日规划提醒-正常-周期」定时任务到时触发的。请执行以下动作：
 1. 若当前时间处于 23:00–07:00 且该任务级别非「重要」，跳过本次发送，在回复中说明"深夜静默已跳过"，直接结束。
-2. 读取文件 /Users/mima1234/DoubaoWork/feishu-reminder-webhook.txt 中的飞书自定义机器人 Webhook 地址（去除首尾空白）。
+2. 读取文件 ./feishu-reminder-webhook.txt 中的飞书自定义机器人 Webhook 地址（去除首尾空白）。
 3. 用 curl 以 POST JSON 方式向该地址发送提醒消息，内容如下：
 {"msg_type":"text","content":{"text":"📌 待办提醒：规划当天任务\n🔥 级别：正常\n⏰ 每工作日 09:30"}}
 4. 若发送失败（HTTP 失败或响应 code 不为 0），等待约 10 秒后重试一次；仍失败则在回复中明确说明失败原因，不要静默跳过。

@@ -39,10 +39,10 @@ description: 个人备忘录与飞书定时提醒（分级+闭环+播报+周报�
 ## 第三步：创建飞书待办（lark-cli task +create）
 
 ```bash
-lark-cli task +create --summary "{任务内容}" --assignee "ou_2b934d4428a22adfc9e45ccd21e4c15c" --due "{截止时间 ISO8601}" --description "级别：{级别}{；附注：{用户附加信息}}"
+lark-cli task +create --summary "{任务内容}" --assignee "ou_<你的OpenID>" --due "{截止时间 ISO8601}" --description "级别：{级别}{；附注：{用户附加信息}}"
 ```
 
-- `assignee` 固定当前用户 open_id（李子龙：`ou_2b934d4428a22adfc9e45ccd21e4c15c`）；`due` 用 ISO8601。
+- `assignee` 固定为当前用户 open_id（使用前替换为 `ou_<你的OpenID>`）；`due` 用 ISO8601。
 - **description 必须写入级别**（供播报/扫描/周报读取）；**无附注时省略"；附注：…"整段**，不残留空字段。
 - 用户附链接/说明时写入 description；文件可另用 `+upload-attachment` 上传。
 - 成功后记录 `guid` 与 `url`，回复给出任务链接。
@@ -74,7 +74,7 @@ lark-cli task +create --summary "{任务内容}" --assignee "ou_2b934d4428a22adf
 本次请求是由「{title}」定时任务到时触发的。请执行以下动作：
 1. 用 lark-cli 查询飞书任务 {guid}（{url}）的当前状态；若任务已完成/已结束，本次不发送任何消息，直接结束。
 2. 若当前时间处于 23:00–07:00 且该任务级别非「重要」，跳过本次发送，在回复中说明"深夜静默已跳过"，直接结束。
-3. 读取文件 /Users/mima1234/DoubaoWork/feishu-reminder-webhook.txt 中的飞书自定义机器人 Webhook 地址（去除首尾空白）。
+3. 读取文件 ./feishu-reminder-webhook.txt 中的飞书自定义机器人 Webhook 地址（去除首尾空白）。
 4. 用 curl 以 POST JSON 方式向该地址发送提醒消息，内容如下：
 {"msg_type":"text","content":{"text":"📌 待办提醒：{任务内容}\n🔥 级别：{级别}\n⏰ 截止时间：{时间}（{距截止剩余时长}）\n🔗 任务链接：{url}{（如有描述摘要一并附上）}"}}
 5. 若发送失败（HTTP 失败或响应 code 不为 0），等待约 10 秒后重试一次；仍失败则在回复中明确说明失败原因，不要静默跳过。
@@ -86,7 +86,7 @@ lark-cli task +create --summary "{任务内容}" --assignee "ou_2b934d4428a22adf
 本次请求是由「{title}」定时任务到时触发的。请执行以下动作：
 1. 用 lark-cli 查询飞书任务 {guid}（{url}）的当前状态。
 2. 若任务已完成/已结束，本次不发送任何消息，直接结束。
-3. 若任务仍未完成，读取文件 /Users/mima1234/DoubaoWork/feishu-reminder-webhook.txt 中的 Webhook 地址（去除首尾空白），用 curl POST 推送最终提醒：
+3. 若任务仍未完成，读取文件 ./feishu-reminder-webhook.txt 中的 Webhook 地址（去除首尾空白），用 curl POST 推送最终提醒：
 {"msg_type":"text","content":{"text":"⏰ 最终提醒：{任务内容} 将在 1 分钟内到期，若还未完成请抓紧处理\n🔗 任务链接：{url}"}}
 4. 若发送失败（HTTP 失败或响应 code 不为 0），等待约 10 秒后重试一次；仍失败则在回复中明确说明失败原因，不要静默跳过。
 ```
@@ -96,7 +96,7 @@ lark-cli task +create --summary "{任务内容}" --assignee "ou_2b934d4428a22adf
 ```text
 本次请求是由「{title}」定时任务到时触发的。请执行以下动作：
 1. 若当前时间处于 23:00–07:00 且该任务级别非「重要」，跳过本次发送，在回复中说明"深夜静默已跳过"，直接结束。
-2. 读取文件 /Users/mima1234/DoubaoWork/feishu-reminder-webhook.txt 中的飞书自定义机器人 Webhook 地址（去除首尾空白）。
+2. 读取文件 ./feishu-reminder-webhook.txt 中的飞书自定义机器人 Webhook 地址（去除首尾空白）。
 3. 用 curl 以 POST JSON 方式向该地址发送提醒消息，内容如下：
 {"msg_type":"text","content":{"text":"📌 待办提醒：{任务内容}\n🔥 级别：{级别}\n⏰ {周期说明}"}}
 4. 若发送失败（HTTP 失败或响应 code 不为 0），等待约 10 秒后重试一次；仍失败则在回复中明确说明失败原因，不要静默跳过。
@@ -119,7 +119,7 @@ lark-cli task +create --summary "{任务内容}" --assignee "ou_2b934d4428a22adf
 | 🔍 完成确认扫描 | 每天 08:00–23:00 每小时 | 读群新消息（游标去重，游标在全部处理完成后更新）识别「完成」→ 勾选任务 → 按「任务名-」前缀清理剩余提醒（白名单保护常驻任务） |
 | 📊 每周任务回顾 | 每周日 20:00 | 统计本周任务完成/逾期/级别分布 → Webhook 推送周报。**统计口径**：任务范围 = 截止时间落在本周（周一 00:00–周日 23:59）的任务；已完成数 = 范围内已标记完成的任务；逾期数 = 已过截止仍未完成、或完成时间晚于截止的任务 |
 
-- 游标文件：`/Users/mima1234/DoubaoWork/feishu-reminder-scan-cursor.txt`（扫描专用，自动读写，勿删除）。
+- 游标文件：`./feishu-reminder-scan-cursor.txt`（扫描专用，自动读写，勿删除）。
 - 平台限制：定时任务最小间隔 1 小时（30 分钟级不支持）；高峰期（7:30–10:00 等）系统可能提前触发，以返回的 `next_trigger_time` 为准。
 - 常驻任务改时间/频率：`get_cron_job` + `update_cron_job`（改时间只传 schedule+schedule_type，query 保持最新模板）。
 - **维护约定**：技能模板升级后，需按最新模板**同步更新三个常驻任务的 query**（`get_cron_job` 取详情 → `update_cron_job` 传新 query），避免文档与实跑漂移。
@@ -149,7 +149,7 @@ lark-cli task +create --summary "{任务内容}" --assignee "ou_2b934d4428a22adf
 ## 边界与注意事项
 
 - 微信/QQ 等腾讯客户端消息不支持；通知通道仅用飞书机器人（本连接器 UAT-only，`--as bot` 不可用，勿尝试）。
-- Webhook 地址是敏感凭证：只存本地文件 `/Users/mima1234/DoubaoWork/feishu-reminder-webhook.txt`，禁止写进 query/回复/文档明文。
+- Webhook 地址是敏感凭证：只存本地文件 `./feishu-reminder-webhook.txt`，禁止写进 query/回复/文档明文。
 - 触发时 Webhook 失效：明确告知失败原因，请用户重建机器人并提供新地址，不反复重试。
 - 平台定时任务最小间隔 1 小时；周期任务不套多阶段。
 - 同时改多条/删多条时，先与用户确认关键点，避免误删。

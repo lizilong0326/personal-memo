@@ -77,10 +77,18 @@ personal-memo/
 └── .gitignore                    # 排除敏感与运行时文件
 ```
 
+## 🔧 使用前配置
+
+仓库为开源模板，已脱敏。克隆后把以下两处替换为你自己的值：
+
+1. **飞书 open_id**：`SKILL.md` / `references/usage-examples.md` 中的 `ou_<你的OpenID>`
+2. **Webhook 文件**：本地创建 `feishu-reminder-webhook.txt`（内容为飞书自定义机器人 Webhook 地址）。模板使用相对路径 `./feishu-reminder-webhook.txt`，该文件已被 `.gitignore` 排除，**切勿提交**
+
 ## 🔒 隐私与安全
 
+- 仓库内容已脱敏：open_id、本地路径已替换为占位符，不含个人标识
 - Webhook 地址等敏感凭证**不进入仓库**（由 `.gitignore` 排除，仅存本地文件）
-- 仓库默认建议设为 **Private**；如需公开分享，请先替换文件中的个人标识（open_id、群 chat_id、本地路径）
+- 群名、任务示例等均可按需自行修改
 
 ## 📄 许可证
 
