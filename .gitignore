@@ -1,0 +1,10 @@
+# 敏感凭证与运行时文件 —— 切勿提交
+feishu-reminder-webhook.txt
+feishu-reminder-scan-cursor.txt
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
